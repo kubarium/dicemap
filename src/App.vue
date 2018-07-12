@@ -61,9 +61,9 @@
           </div>
         </div>
       </nav>
-      <section class="section">{{coord}}</section>
+      <section class="section">{{point.x-offsetX}}-{{point.y-offsetY}}</section>
       <section class="section">
-        <svg height="1030" width="1050" id="asd">
+        <svg>
           <defs>
             <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
               <path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" stroke-width="0.5"></path>
@@ -74,15 +74,16 @@
             </pattern>
           </defs>
 
-          <text v-for="(v,index) in new Array(10)" :key="`legend-x-${index}`" :x="`${75+(index*100)}`" y="20" class="legend">{{index%10}}{{index===0?"":"X"}}</text>
+          <text v-for="(v,index) in new Array(10)" :key="`legend-x-${index}`" :x="`${75+(index*100)}`" :y="offsetY" class="legend">{{index%10}}{{index===0?"":"X"}}</text>
           <text v-for="(v,index) in new Array(10)" :key="`legend-y-${index}`" :y="`${80+(index*100)}`" x="0" class="legend">{{index%10}}{{index===0?"":"X"}}</text>
-          <text v-for="(v,index) in new Array(100)" :key="`x-${index}`" :x="`${30+(index*10)}`" y="30">{{index%10+1}}</text>
-          <text v-for="(v,index) in new Array(100)" :key="`y-${index}`" :y="`${40+(index*10)}`" x="20">{{index%10+1}}</text>
-          <rect width="10" height="10" fill="red" v-bind:x="`${preview.x}`" v-bind:y="`${preview.y}`" v-show="preview.show" />
-          <rect width="10" height="10" fill="blue" v-for="point in points" v-bind:x="`${point.x}`" v-bind:y="`${point.y}`" />
+          <text v-for="(v,index) in new Array(100)" :key="`x-${index}`" :x="`${30+(index*10)}`" :y="offsetY+10">{{index%10+1}}</text>
+          <text v-for="(v,index) in new Array(100)" :key="`y-${index}`" :y="`${40+(index*10)}`" :x="offsetX">{{index%10+1}}</text>
 
+          <rect class="point red" :x="point.x" :y="point.y" v-show="preview" />
 
-          <rect fill="url(#grid10)" height="1000 " width="1000 " x="30" y="30" @click="placePoint" @mousemove="updateCoord" @mouseout="preview.show=false" />
+          <rect class="point blue" v-for="(point,index) in points" :key="index" :x="point.x" :y="point.y" />
+
+          <rect fill="url(#grid10)" height="1000 " width="1000 " x="30" y="30" @click="clickPoint" @mousemove="movePoint" @mouseout="preview=false" />
         </svg>
       </section>
       <!-- <router-view/> -->
@@ -90,41 +91,51 @@
   </section>
 </template>
 <script>
+console.clear();
 export default {
   data() {
     return {
-      coord: "",
-      preview: { show: false },
+      preview: false,
+      point: { x: 0, y: 0 },
       points: [],
-      offsetX:20,
-      offsetY:20
+      offsetX: 20,
+      offsetY: 20
     };
   },
   methods: {
-    placePoint(event) {
-      //var normalizedCoords = this.normalizeCoords([event.offsetX,event.offsetY]);
-
-      this.points.push(this.normalizeCoords([event.offsetX,event.offsetY]));
-    },
-    updateCoord(event) {
-      var normalizedCoords = this.normalizeCoords([event.offsetX,event.offsetY]);
-      this.preview = Object.assign(
-        {},
-        this.normalizeCoords([event.offsetX,event.offsetY]),
-        {
-         
-          show: true
-        }
+    hasPoint(newPoint) {
+      return (
+        this.points.filter(
+          point => point.x == newPoint.x && point.y == newPoint.y
+        ).length > 0
       );
-
-      //this.coord = `${event.offsetX - (event.offsetX - 1) % 10}-${event.offsetY - (event.offsetY - 1) % 10}`;
     },
-    normalizeCoords([offsetX,offsetY]){
-      return { 
-          x: offsetX - (offsetX - 1) % 10,
-          y: offsetY - (offsetY - 0) % 10 
-          }
-      //return {x:offsetX - this.offsetX - 1,y:offsetY - this.offsetY};
+    removePoint(oldPoint) {
+      this.points = this.points.filter(
+        point => point.x != oldPoint.x || point.y != oldPoint.y
+      );
+    },
+    addPoint(newPoint) {
+      this.points.push(newPoint);
+    },
+    clickPoint() {
+      let point = this.normalizeCoords(event.offsetX, event.offsetY);
+
+      this.hasPoint(point) ? this.removePoint(point) : this.addPoint(point);
+    },
+    movePoint(event) {
+      this.preview = true;
+
+      Object.assign(
+        this.point,
+        this.normalizeCoords(event.offsetX, event.offsetY)
+      );
+    },
+    normalizeCoords(offsetX, offsetY) {
+      return {
+        x: offsetX - offsetX % 10,
+        y: offsetY - offsetY % 10
+      };
     }
   }
 };
@@ -138,11 +149,25 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
+svg {
+  height: 1030px;
+  width: 1030px;
+}
 text {
   font-family: monospace;
   font-size: 10px;
 }
-.legend{
+.legend {
   font-size: 16px;
+}
+.point {
+  width: 10px;
+  height: 10px;
+}
+.blue {
+  fill: blue;
+}
+.red {
+  fill: red;
 }
 </style>
