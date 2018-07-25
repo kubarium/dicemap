@@ -1,36 +1,26 @@
 <template>
     <section class="component">
-        <div class="panel-block all-tags" v-for="tag in $store.state.tags" :key="tag.id">
-            <!-- {{tag.name}} -->
-            <!-- <div class="field has-addons">
-                <p class="control is-expanded has-icons-right">
-                    <input type="text" class="input  " placeholder="Map Name" v-model="tag.name" />
-                    <span class="icon is-small is-right" v-show="$store.state.justSaved">
-                        <i class="fas fa-check"></i>
+        <div class="panel-block">
+            <div class="tags">
+                <span class="tag is-info" v-for="tag in $store.state.tags" :key="tag.id">
+                    <span @click="editTag(tag)">
+                        {{tag.name}}
                     </span>
-                </p>
-                <div class="control">
-                    <button class="button is-info is-pulled-right" @click="$store.dispatch('saveMap')">Save</button>
-                </div>
-            </div> -->
+                    <button class="delete is-small" @click="$store.dispatch('deleteTag',tag)"></button>
+                </span>
+            </div>
+        </div>
+        <div class="panel-block all-tags" v-if="tag">
             <input type="text" class="input is-small" placeholder="Tag" v-model="tag.name" />
 
-            <button class="button is-info is-small" @click="$store.dispatch('saveTag',tag)">
+            <button class="button is-info is-small" @click="$store.dispatch('saveTag',tag); tag=null">
                 <span class="icon">
                     <i class="fas fa-save"></i>
-                </span>
-            </button>
-            <button class="button is-link is-small" @click="$store.dispatch('deleteTag',tag)">
-                <span class="icon">
-                    <i class="fas fa-trash"></i>
                 </span>
             </button>
         </div>
         <footer>
             <button class="button is-success is-small" @click="$store.dispatch('newTag')">
-                <!-- <span class="icon">
-                    <i class="fas fa-trash"></i>
-                </span> -->
                 New Tag
             </button>
         </footer>
@@ -41,6 +31,16 @@
 export default {
   created() {
     this.$store.dispatch("fetchTags");
+  },
+  data() {
+    return {
+      tag: null
+    };
+  },
+  methods: {
+    editTag(tag) {
+      this.tag = tag;
+    }
   }
 };
 </script>
@@ -48,6 +48,9 @@ export default {
 <style lang="sass" scoped>
 .all-tags
     display: grid
-    grid-template-columns: 1fr auto auto
+    grid-template-columns: 1fr auto
     gap: 10px
+
+.tag
+    cursor: pointer
 </style>
