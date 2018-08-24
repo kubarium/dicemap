@@ -29,16 +29,19 @@
 </template>
 
 <script>
+import { lowestDecimal, highestDecimal } from "@/utils";
 export default {
   name: "Grid",
   data() {
     return {
       preview: false,
-      points: [],
+      //points: [],
       point: {
         x: 0,
         y: 0
-      }
+      },
+      offsetX: 10,
+      offsetY: 10
     };
   },
   methods: {
@@ -46,57 +49,28 @@ export default {
       //console.log(event);
       this.preview = true;
 
-      Object.assign(
-        this.point,
-        this.lowestDecimal(event.offsetX, event.offsetY)
-      );
-    },
-    hasPoint(newPoint) {
-      return (
-        this.points.filter(
-          point => point.x == newPoint.x && point.y == newPoint.y
-        ).length > 0
-      );
-    },
-    removePoint(oldPoint) {
-      this.points = this.points.filter(
-        point => point.x != oldPoint.x || point.y != oldPoint.y
-      );
-    },
-    addPoint(newPoint) {
-      this.points.push(newPoint);
+      Object.assign(this.point, lowestDecimal(event.offsetX, event.offsetY));
     },
     clickPoint(event, override) {
-      console.log(event);
-      console.log(override);
+      /* console.log(event);
+      console.log(override); */
 
       let point = override
-        ? this.lowestDecimal(
-            override.x + this.offsetX,
-            override.y + this.offsetY
-          )
-        : this.lowestDecimal(
+        ? lowestDecimal(override.x + this.offsetX, override.y + this.offsetY)
+        : lowestDecimal(
             event.offsetX + this.offsetX,
             event.offsetY + this.offsetY
           );
-      console.log(point);
+      //console.log(point);
 
-      this.hasPoint(point) ? this.removePoint(point) : this.addPoint(point);
-    },
-    highestDecimal(x, y) {
-      return { x: x - x % 10 + 10, y: y - y % 10 + 10 };
-    },
-    lowestDecimal(x, y) {
-      return {
-        x: x - x % 10,
-        y: y - y % 10
-      };
+      this.$store.getters.hasPoint(point)
+        ? this.$store.commit("removePoint", point)
+        : this.$store.commit("addPoint", point);
     }
   }
 };
 </script>
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="sass" scoped>
+<style lang="sass" scoped>
 $dimension: 1000px
 $legend-gap: 30px 
 

@@ -1,74 +1,74 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import firebase, {
-  firestore
-} from "firebase";
-import {
-  toDateString
-} from "@/utils";
-
+import {toDateString} from "@/utils";
+import {db} from "./firebase.config"
 Vue.use(Vuex);
-
-var config = {
-  aapiKey: "AIzaSyBkYlXm2z2MDvJJ60cwiXNk3hbayuRdGFE",
-  authDomain: "dicemap-ced28.firebaseapp.com",
-  databaseURL: "https://dicemap-ced28.firebaseio.com",
-  projectId: "dicemap-ced28",
-  storageBucket: "dicemap-ced28.appspot.com",
-  messagingSenderId: "667146309486"
-};
-var db;
-
-(function () {
-  try {
-    firebase.initializeApp(config);
-  } catch (error) {
-    if (error.code !== "app/duplicate-app") {
-      console.log(error);
-    }
-  } finally {
-    db = firebase.firestore();
-  }
-})();
 
 export default new Vuex.Store({
   state: {
     justSaved: false,
     maps: [],
     map: {},
-    tabs: ["Maps", "Tools", "Tags"],
+    tabs: [
+      "Maps", "Tools", "Tags"
+    ],
     tab: "Maps",
     showNav: false,
     search: "",
     tags: []
   },
   getters: {
-    showTab: (state) => (tab) => state.tab === tab
+    showTab: (state) => (tab) => state.tab === tab,
+    hasPoint: (state) => (newPoint) => state
+      .map
+      .points
+      .filter(point => point.x == newPoint.x && point.y == newPoint.y)
+      .length > 0
+
   },
   mutations: {
-    changeTab: (state, tab) => state.tab = tab
+    changeTab: (state, tab) => state.tab = tab,
+    addPoint: (state, newPoint) => state
+      .map
+      .points
+      .push(newPoint),
+    removePoint: (state, oldPoint) => state.map.points = state
+      .map
+      .points
+      .filter(point => point.x != oldPoint.x || point.y != oldPoint.y)
   },
   actions: {
     fetchLast5Maps: (context) => {
-      db.collection("maps").orderBy("editDate", "desc").limit(5).onSnapshot(entries => {
-        context.state.maps = entries.docs.map(doc => {
-          return {
-            id: doc.id,
-            ...doc.data(),
-            editDate: toDateString(doc.data().editDate)
-          }
+      db
+        .collection("maps")
+        .orderBy("editDate", "desc")
+        .limit(5)
+        .onSnapshot(entries => {
+          context.state.maps = entries
+            .docs
+            .map(doc => {
+              return {
+                id: doc.id,
+                ...doc.data(),
+                editDate: toDateString(doc.data().editDate)
+              }
+            })
         })
-      })
     },
     fetchTags: (context) => {
-      db.collection("tags").orderBy("name").onSnapshot(entries => {
-        context.state.tags = entries.docs.map(doc => {
-          return {
-            id: doc.id,
-            ...doc.data()
-          }
+      db
+        .collection("tags")
+        .orderBy("name")
+        .onSnapshot(entries => {
+          context.state.tags = entries
+            .docs
+            .map(doc => {
+              return {
+                id: doc.id,
+                ...doc.data()
+              }
+            })
         })
-      })
     },
     editMap: (context, map) => {
       context.state.map = map;
@@ -80,16 +80,21 @@ export default new Vuex.Store({
         editDate: new Date().getTime(),
         points: []
       }
-      db.collection("maps").add(map).then(doc => context.dispatch('editMap', Object.assign(map, {
-        id: doc.id
-      })))
+      context.state.map = map
+      db
+        .collection("maps")
+        .add(map)
+        .then(doc => context.dispatch('editMap', Object.assign(map, {id: doc.id})))
     },
     newTag: (context) => {
       var tag = {
         name: "New Tag"
       }
       console.log(tag)
-      db.collection("tags").add(tag).then(function (docRef) {
+      db
+        .collection("tags")
+        .add(tag)
+        .then(function (docRef) {
           console.log("Document written with ID: ", docRef.id);
         })
         .catch(function (error) {
@@ -98,7 +103,8 @@ export default new Vuex.Store({
     },
     saveMap: (context) => {
       db
-        .collection("maps").doc(context.state.map.id)
+        .collection("maps")
+        .doc(context.state.map.id)
         .set({
           name: context.state.map.name,
           editDate: new Date().getTime(),
@@ -115,19 +121,26 @@ export default new Vuex.Store({
         });
     },
     saveTag: (context, tag) => {
-      db.collection("tags").doc(tag.id).set({
-        name: tag.name
-      })
+      db
+        .collection("tags")
+        .doc(tag.id)
+        .set({name: tag.name})
     },
     deleteMap(context, id) {
-      db.collection("maps").doc(id).delete()
+      db
+        .collection("maps")
+        .doc(id)
+        .delete()
     },
     deleteTag(context, tag) {
-      db.collection("tags").doc(tag.id).delete()
+      db
+        .collection("tags")
+        .doc(tag.id)
+        .delete()
     },
     search(context, event) {
       //console.log(event)
-      if (context.state.search.length >= 3)
+      if (context.state.search.length >= 3) 
         console.log("SIKERLER")
     }
   }

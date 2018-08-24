@@ -14,9 +14,14 @@
             </div>
         </div>
         <div class="panel-block">
-            <div class="buttons has-addons">
+            <div class="preview">
+                <span class="dot" :style="{left:`${point.x/10}px`,top:`${point.y/10}px`}" v-for="(point,index) in $store.state.map.points" :key="index">""</span>
+            </div>
+        </div>
+        <div class="panel-block">
+            <div class="buttons has-addons dice">
                 <span class="button is-small" @click="applyDice">Apply All</span>
-                <!-- <button class="button is-small" :disabled="hasPoint(die)" :class="{'is-link':die.applied}" v-for="(die,index) in dice" :key="index" @click="applyDie(die)">{{die.x+offsetX}}-{{die.y+offsetY}}</button> -->
+                <button class="button is-small" :disabled="$store.getters.hasPoint(die)" :class="{'is-link':die.applied}" v-for="(die,index) in dice" :key="index" @click="applyDie(die)">{{die.x+offsetX}}-{{die.y+offsetY}}</button>
             </div>
             <p class="is-5">
                 <!-- Point: {{point.x+this.offsetX}}-{{point.y+this.offsetY}} -->
@@ -37,12 +42,15 @@
 </template>
 
 <script>
+import { lowestDecimal, highestDecimal } from "@/utils";
 export default {
   name: "Tools",
   data() {
     return {
       times: 10,
-      dice: []
+      dice: [],
+      offsetX: 10,
+      offsetY: 10
     };
   },
   methods: {
@@ -51,7 +59,7 @@ export default {
       this.dice.splice(0);
 
       do {
-        let die = this.lowestDecimal(
+        let die = lowestDecimal(
           Math.floor(Math.random() * 1000) + 10,
           Math.floor(Math.random() * 1000) + 10
         );
@@ -77,5 +85,16 @@ export default {
 
 
 <style lang="sass" scoped>
-
+.preview
+    outline: 1px solid #EBEBEB
+    width: 100px
+    height: 100px
+    position: relative
+.dot
+    outline: 1px solid blue
+    position: absolute
+    font-size: 0px
+    line-height: 0px
+.dice .button
+    width: 67px
 </style>

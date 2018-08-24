@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-console.clear();
+//console.clear();
 </script>
 
 <style lang="sass">

@@ -33,10 +33,7 @@ export default {
     Tags
   },
   data() {
-    return {
-      offsetX: 10,
-      offsetY: 10
-    };
+    return {};
   },
   methods: {}
 };

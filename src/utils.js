@@ -11,4 +11,17 @@ export const toDateString = (milliseconds) => {
     return `${theyear}/${themonth}/${theday}, ${thehour}:${theminutes}`;
 }
 
+export const highestDecimal = (x, y) => {
+    return {
+        x: x - x % 10 + 10,
+        y: y - y % 10 + 10
+    };
+}
+export const lowestDecimal = (x, y) => {
+    return {
+        x: x - x % 10,
+        y: y - y % 10
+    };
+}
+
 const pad = (number) => number < 10 ? `0${number}` : number
