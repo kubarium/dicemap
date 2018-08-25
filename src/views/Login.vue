@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import firebase from "firebase/app";
+//import firebase from "firebase/app";
 import { currentUser, signInWithEmailAndPassword } from "@/firebase.config";
 /* 
 import "firebase/auth";
@@ -49,7 +49,7 @@ export default {
   methods: {
     signIn() {
       signInWithEmailAndPassword(this.email, this.password).then(
-        user => {
+        () => {
           this.$router.replace("/maps");
         },
         err => {

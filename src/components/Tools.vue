@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { lowestDecimal, highestDecimal } from "@/utils";
+import { lowestDecimal } from "@/utils";
 export default {
   name: "Tools",
   data() {
